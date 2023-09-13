@@ -3,7 +3,8 @@ const express = require("express");
 const bodyparser = require('body-parser');
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-const encypt = require("mongoose-encryption");
+const md5 = require("md5");
+// const encypt = require("mongoose-encryption");
 
 
 const app = express();
@@ -19,8 +20,8 @@ const userScema = new mongoose.Schema({
     password: String
 });
 // const secret = "i cant live without manya"
-const secret = process.env.SECRT;
-userScema.plugin(encypt,{secret:secret , encryptedFields: ["password"]});
+// const secret = process.env.SECRT;
+// userScema.plugin(encypt,{secret:secret , encryptedFields: ["password"]});
 
 const user = new mongoose.model("user", userScema);
 
@@ -34,7 +35,7 @@ app.get("/login", function(req,res){
 });
 app.post("/login", function(req,res){
     const name = req.body.username;
-    const pass = req.body.password;
+    const pass = md5(req.body.password);
     user.findOne({email: name}).then((foundusere) => {
         if(foundusere){
             if(foundusere.password===pass){
@@ -51,7 +52,7 @@ app.get("/register", function(req,res){
 app.post("/register", function(req,res){
     const newuser = new user({
         email: req.body.username,
-        password: req.body.password
+        password: md5(req.body.password)
     });
     newuser.save().then(() => res.render("secrets"));
 });
